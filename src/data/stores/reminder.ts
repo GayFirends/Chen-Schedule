@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { ReminderSettings } from '../models';
 import { DEFAULT_REMINDER_SETTINGS } from '../services/notification';
+import { reminderStorage } from '../db/storage';
 
 interface ReminderStore extends ReminderSettings {
   setEnabled: (enabled: boolean) => void;
@@ -22,6 +23,9 @@ export const useReminderStore = create<ReminderStore>()(
       setEnableVibration: (enableVibration) => set({ enableVibration }),
       reset: () => set(DEFAULT_REMINDER_SETTINGS),
     }),
-    { name: 'reminder-settings' }
+    {
+      name: 'reminder-settings',
+      storage: reminderStorage,
+    }
   )
 );

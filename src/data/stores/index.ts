@@ -3,6 +3,12 @@ import { persist } from 'zustand/middleware';
 import { v4 as uuidv4 } from 'uuid';
 import type { Schedule, Course, TimeSlot, AppSettings } from '../models';
 import { DEFAULT_TIME_SLOTS, STORAGE_KEYS } from '../../core/constants';
+import {
+  schedulesStorage,
+  coursesStorage,
+  timeSlotsStorage,
+  settingsStorage,
+} from '../db/storage';
 
 export { useWebDAVStore } from './webdav';
 export { useReminderStore } from './reminder';
@@ -65,7 +71,10 @@ export const useScheduleStore = create<ScheduleStore>()(
         return schedules.find((s) => s.id === currentScheduleId);
       },
     }),
-    { name: STORAGE_KEYS.SCHEDULES }
+    {
+      name: STORAGE_KEYS.SCHEDULES,
+      storage: schedulesStorage,
+    }
   )
 );
 
@@ -124,7 +133,10 @@ export const useCourseStore = create<CourseStore>()(
         );
       },
     }),
-    { name: STORAGE_KEYS.COURSES }
+    {
+      name: STORAGE_KEYS.COURSES,
+      storage: coursesStorage,
+    }
   )
 );
 
@@ -152,7 +164,10 @@ export const useTimeSlotStore = create<TimeSlotStore>()(
         }));
       },
     }),
-    { name: STORAGE_KEYS.TIME_SLOTS }
+    {
+      name: STORAGE_KEYS.TIME_SLOTS,
+      storage: timeSlotsStorage,
+    }
   )
 );
 
@@ -178,6 +193,9 @@ export const useSettingsStore = create<SettingsStore>()(
         set({ currentWeek: week });
       },
     }),
-    { name: STORAGE_KEYS.SETTINGS }
+    {
+      name: STORAGE_KEYS.SETTINGS,
+      storage: settingsStorage,
+    }
   )
 );

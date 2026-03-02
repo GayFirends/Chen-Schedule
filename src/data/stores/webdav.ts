@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { WebDAVConfig, SyncStatus, SyncHistoryItem } from '../models';
 import { STORAGE_KEYS } from '../../core/constants';
+import { webdavStorage } from '../db/storage';
 
 interface WebDAVStore {
   config: WebDAVConfig | null;
@@ -42,6 +43,9 @@ export const useWebDAVStore = create<WebDAVStore>()(
         set({ syncHistory: [] });
       },
     }),
-    { name: STORAGE_KEYS.WEBDAV_CONFIG }
+    {
+      name: STORAGE_KEYS.WEBDAV_CONFIG,
+      storage: webdavStorage,
+    }
   )
 );
