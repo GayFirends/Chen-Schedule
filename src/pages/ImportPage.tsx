@@ -68,6 +68,7 @@ export function ImportPage() {
     for (const courseData of result.courses) {
       addCourse({
         ...courseData,
+        scheduleId: currentScheduleId,
         color: COURSE_COLORS[colorIndex % COURSE_COLORS.length],
       });
       colorIndex++;

@@ -1,23 +1,27 @@
 import { initDB, STORES } from './index';
-import type { StateStorage } from 'zustand/middleware/persist';
+import type { PersistStorage, StorageValue } from 'zustand/middleware/persist';
 
-// IndexedDB 存储适配器（支持 Zustand persist 中间件）
-export function createIndexedDBStorage(storeName: string): StateStorage {
+// IndexedDB 存储适配器（支持 Zustand v5 persist 中间件）
+export function createIndexedDBStorage<S>(storeName: string): PersistStorage<S> {
   return {
-    getItem: async (name: string): Promise<string | null> => {
+    getItem: async (name: string): Promise<StorageValue<S> | null> => {
       try {
         const db = await initDB();
         const result = await db.get(storeName, name);
-        return result?.value ?? null;
+        if (result?.value) {
+          const parsed = JSON.parse(result.value);
+          return parsed;
+        }
+        return null;
       } catch (error) {
         console.error(`Failed to get ${name} from IndexedDB:`, error);
         return null;
       }
     },
-    setItem: async (name: string, value: string): Promise<void> => {
+    setItem: async (name: string, value: StorageValue<S>): Promise<void> => {
       try {
         const db = await initDB();
-        await db.put(storeName, { key: name, value });
+        await db.put(storeName, { key: name, value: JSON.stringify(value) });
       } catch (error) {
         console.error(`Failed to set ${name} in IndexedDB:`, error);
       }

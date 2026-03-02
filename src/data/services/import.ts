@@ -92,7 +92,7 @@ export function parseDayOfWeek(dayStr: string): number {
 }
 
 // 正方教务系统 HTML 解析
-export function parseZhengfangHTML(html: string, scheduleId: string): ImportResult {
+export function parseZhengfangHTML(html: string, _scheduleId: string): ImportResult {
   const courses: ImportResult['courses'] = [];
   const errors: string[] = [];
 
@@ -179,7 +179,7 @@ function parseZhengfangCourseCell(text: string): {
 }
 
 // 青果教务系统 HTML 解析
-export function parseQingguoHTML(html: string, scheduleId: string): ImportResult {
+export function parseQingguoHTML(html: string, _scheduleId: string): ImportResult {
   const courses: ImportResult['courses'] = [];
   const errors: string[] = [];
 
@@ -252,7 +252,7 @@ function parseQingguoCourseCell(text: string): {
 }
 
 // 通用 HTML 表格解析
-export function parseGenericHTML(html: string, scheduleId: string): ImportResult {
+export function parseGenericHTML(html: string, _scheduleId: string): ImportResult {
   const courses: ImportResult['courses'] = [];
   const errors: string[] = [];
 
