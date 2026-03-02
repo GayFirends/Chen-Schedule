@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom'
 import { HomePage, SettingsPage, SyncPage } from './pages'
+import { ImportPage } from './pages/ImportPage'
 import { useTheme } from './hooks/useTheme'
 
 function App() {
@@ -10,6 +11,7 @@ function App() {
       <div style={{ minHeight: '100vh', background: 'var(--surface)' }}>
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/import" element={<ImportPage />} />
           <Route path="/sync" element={<SyncPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>
@@ -24,6 +26,7 @@ function BottomNav() {
     <nav className="bottom-nav">
       <div className="nav-inner">
         <NavItem to="/" icon={<CalendarIcon />} label="课表" />
+        <NavItem to="/import" icon={<ImportIcon />} label="导入" />
         <NavItem to="/sync" icon={<SyncIcon />} label="同步" />
         <NavItem to="/settings" icon={<SettingsIcon />} label="设置" />
       </div>
@@ -55,6 +58,14 @@ function SyncIcon() {
   return (
     <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
       <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+    </svg>
+  )
+}
+
+function ImportIcon() {
+  return (
+    <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
     </svg>
   )
 }

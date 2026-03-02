@@ -65,6 +65,19 @@ export interface SyncStatus {
   lastError?: string;
 }
 
+// 同步历史记录
+export interface SyncHistoryItem {
+  id: string;
+  type: 'upload' | 'download' | 'auto';
+  timestamp: string;
+  status: 'success' | 'failed';
+  message?: string;
+  stats?: {
+    schedules: number;
+    courses: number;
+  };
+}
+
 // 导入来源类型
 export type ImportSourceType = 'url' | 'html' | 'file';
 

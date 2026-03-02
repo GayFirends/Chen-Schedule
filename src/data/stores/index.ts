@@ -5,6 +5,7 @@ import type { Schedule, Course, TimeSlot, AppSettings } from '../models';
 import { DEFAULT_TIME_SLOTS, STORAGE_KEYS } from '../../core/constants';
 
 export { useWebDAVStore } from './webdav';
+export { useReminderStore } from './reminder';
 
 // 课程表 Store
 interface ScheduleStore {
