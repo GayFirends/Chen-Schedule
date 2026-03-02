@@ -1,5 +1,5 @@
 import { openDB, type IDBPDatabase } from 'idb';
-import type { Schedule, Course, TimeSlot, AppSettings, WebDAVConfig, SyncHistoryItem, ReminderSettings } from '../models';
+import type { Schedule, Course, TimeSlot, WebDAVConfig, SyncHistoryItem, ReminderSettings } from '../models';
 
 const DB_NAME = 'course-schedule-db';
 const DB_VERSION = 2;
@@ -209,8 +209,6 @@ export const reminderSettingsDB = {
 
 // 从 localStorage 迁移数据到 IndexedDB
 export async function migrateFromLocalStorage(): Promise<void> {
-  const db = await initDB();
-
   // 检查是否已迁移
   const migrated = localStorage.getItem('indexeddb-migrated');
   if (migrated === 'true') return;

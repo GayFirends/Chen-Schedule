@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { Button, Card, Modal } from '../components/common';
 import { useScheduleStore, useCourseStore } from '../data/stores';
 import { importFromHTML, fetchScheduleFromURL } from '../data/services/import';
-import type { EducationalSystemType, ImportResult, Course } from '../data/models';
+import type { EducationalSystemType, ImportResult } from '../data/models';
 import { COURSE_COLORS } from '../core/constants';
 
 type ImportMethod = 'paste' | 'file' | 'url';

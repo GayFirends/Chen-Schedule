@@ -157,7 +157,7 @@ export async function importFromWebDAV(
 export async function smartSync(
   config: WebDAVConfig,
   localData: { schedules: unknown[]; courses: unknown[]; timeSlots: unknown[] },
-  onConflict?: (remoteTimestamp: string, localTimestamp: string) => 'upload' | 'download' | 'cancel'
+  _onConflict?: (remoteTimestamp: string, localTimestamp: string) => 'upload' | 'download' | 'cancel'
 ): Promise<{
   action: 'upload' | 'download' | 'none' | 'cancelled';
   success: boolean;

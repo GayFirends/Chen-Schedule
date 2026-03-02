@@ -1,7 +1,8 @@
 import { initDB, STORES } from './index';
+import type { StateStorage } from 'zustand/middleware/persist';
 
 // IndexedDB 存储适配器（支持 Zustand persist 中间件）
-export function createIndexedDBStorage(storeName: string) {
+export function createIndexedDBStorage(storeName: string): StateStorage {
   return {
     getItem: async (name: string): Promise<string | null> => {
       try {

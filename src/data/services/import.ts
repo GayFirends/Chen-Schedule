@@ -1,4 +1,4 @@
-import type { Course, ImportResult, EducationalSystemType } from '../models';
+import type { ImportResult, EducationalSystemType } from '../models';
 
 // 解析周次字符串，如 "1-8周", "1,3,5周", "单周", "双周"
 export function parseWeeks(weekStr: string): number[] {
@@ -75,7 +75,7 @@ export function parseDayOfWeek(dayStr: string): number {
   const str = dayStr.trim();
 
   const dayMap: Record<string, number> = {
-    '一': 1, '周一': 1, '星期一': 1, '一': 1, '1': 1,
+    '一': 1, '周一': 1, '星期一': 1, '1': 1,
     '二': 2, '周二': 2, '星期二': 2, '2': 2,
     '三': 3, '周三': 3, '星期三': 3, '3': 3,
     '四': 4, '周四': 4, '星期四': 4, '4': 4,
@@ -120,7 +120,6 @@ export function parseZhengfangHTML(html: string, scheduleId: string): ImportResu
           const courseInfo = parseZhengfangCourseCell(text);
           if (courseInfo) {
             courses.push({
-              scheduleId,
               name: courseInfo.name,
               teacher: courseInfo.teacher,
               location: courseInfo.location,
@@ -204,8 +203,13 @@ export function parseQingguoHTML(html: string, scheduleId: string): ImportResult
           const courseInfo = parseQingguoCourseCell(text);
           if (courseInfo) {
             courses.push({
-              scheduleId,
-              ...courseInfo,
+              name: courseInfo.name,
+              teacher: courseInfo.teacher,
+              location: courseInfo.location,
+              weeks: courseInfo.weeks,
+              dayOfWeek: courseInfo.dayOfWeek,
+              startSection: courseInfo.startSection,
+              endSection: courseInfo.endSection,
               color: undefined,
               remark: undefined,
             });
@@ -274,15 +278,11 @@ export function parseGenericHTML(html: string, scheduleId: string): ImportResult
     }
 
     const rows = scheduleTable.querySelectorAll('tr');
-    let headerRow: HTMLTableRowElement | null = null;
-    let headerCells: NodeListOf<HTMLTableCellElement> | null = null;
 
     // 找表头行
     for (const row of rows) {
       const cells = row.querySelectorAll('th');
       if (cells.length > 0) {
-        headerRow = row;
-        headerCells = cells;
         break;
       }
     }
@@ -306,7 +306,6 @@ export function parseGenericHTML(html: string, scheduleId: string): ImportResult
         const courseInfo = parseGenericCourseCell(text);
         if (courseInfo && section) {
           courses.push({
-            scheduleId,
             name: courseInfo.name,
             teacher: courseInfo.teacher,
             location: courseInfo.location,
