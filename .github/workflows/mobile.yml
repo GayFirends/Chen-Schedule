@@ -44,42 +44,6 @@ jobs:
           npx cap add android || true
           npx cap sync android
 
-          cd android
-
-          # Debug: show all gradle files
-          echo "=== Listing files ==="
-          find . -name "*.gradle" -type f
-          echo "=== variables.gradle (if exists) ==="
-          cat variables.gradle 2>/dev/null || echo "No variables.gradle"
-          echo "=== app/build.gradle (full) ==="
-          cat app/build.gradle
-          echo "=== gradle-wrapper.properties ==="
-          cat gradle/wrapper/gradle-wrapper.properties
-
-          # Update Gradle wrapper to 8.9
-          perl -pi -e 's/gradle-8\.2\.1-all\.zip/gradle-8.9-all.zip/g' gradle/wrapper/gradle-wrapper.properties
-
-          # Update AGP version in root build.gradle
-          perl -pi -e 's/com\.android\.tools\.build:gradle:8\.2\.1/com.android.tools.build:gradle:8.7.0/g' build.gradle
-
-          # Try updating variables.gradle first (Capacitor uses this)
-          if [ -f variables.gradle ]; then
-            perl -pi -e 's/compileSdk\s*=\s*34/compileSdk = 35/g' variables.gradle
-            perl -pi -e 's/targetSdk\s*=\s*34/targetSdk = 35/g' variables.gradle
-            perl -pi -e 's/agp\s*=\s*['\''"]8\.2\.1['\''"]/agp = '8.7.0'/g' variables.gradle
-            echo "=== Updated variables.gradle ==="
-            cat variables.gradle
-          fi
-
-          # Also update app/build.gradle directly
-          perl -pi -e 's/compileSdk\s*=?\s*34/compileSdk 35/g' app/build.gradle
-          perl -pi -e 's/targetSdk\s*=?\s*34/targetSdk 35/g' app/build.gradle
-
-          echo "=== Updated app/build.gradle (SDK lines) ==="
-          grep -n "compileSdk\|targetSdk" app/build.gradle || true
-
-          cd ..
-
       - name: Build Android APK (debug)
         if: github.event_name == 'push' || github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all'
         run: |
