@@ -24,16 +24,9 @@ export function useReminder() {
     const schedule = schedules.find(s => s.id === currentScheduleId);
     if (!schedule) return 1;
 
-    // 使用学期开始日期计算当前周次（假设第一周从 startWeek 开始）
-    // 这里简化处理，返回 schedule.startWeek
-    // 实际应用应存储学期开始日期并计算
-    const now = new Date();
-    const dayOfWeek = now.getDay() || 7;
-
-    // 简单计算：假设当前是学期第几周
-    // 实际应该根据学期开始日期计算
-    const currentWeek = schedule.startWeek;
-    return currentWeek;
+    // 返回课表的开始周次
+    // TODO: 根据学期开始日期动态计算当前周次
+    return schedule.startWeek;
   }, [currentScheduleId, schedules]);
 
   // 检查并发送提醒
