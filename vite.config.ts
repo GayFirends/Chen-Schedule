@@ -12,8 +12,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
       manifest: {
-        name: '课程表',
-        short_name: '课程表',
+        name: '简程表',
+        short_name: '简程表',
         description: '一个简洁美观的课程表应用',
         theme_color: '#6750A4',
         background_color: '#FEF7FF',

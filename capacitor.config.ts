@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.example.courseschedule',
-  appName: '课程表',
+  appId: 'com.guchen.courseschedule',
+  appName: '简程表',
   webDir: 'dist',
   server: {
     androidScheme: 'https'
