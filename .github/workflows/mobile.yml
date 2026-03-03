@@ -39,20 +39,20 @@ jobs:
         run: npm install -g @capacitor/cli
 
       - name: Add Android platform
-        if: github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all'
+        if: github.event_name == 'push' || github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all'
         run: |
           npx cap add android || true
           npx cap sync android
 
       - name: Build Android APK (debug)
-        if: github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all'
+        if: github.event_name == 'push' || github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all'
         run: |
           cd android
           ./gradlew assembleDebug
           mv app/build/outputs/apk/debug/app-debug.apk ../app-debug.apk
 
       - name: Upload Android APK
-        if: github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all'
+        if: github.event_name == 'push' || github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all'
         uses: actions/upload-artifact@v4
         with:
           name: android-apk
