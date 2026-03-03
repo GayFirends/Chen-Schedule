@@ -1,4 +1,4 @@
-import { LocalNotifications, ScheduleOptions } from '@capacitor/local-notifications';
+import { LocalNotifications } from '@capacitor/local-notifications';
 import type { Course, TimeSlot, ReminderSettings } from '../models';
 
 // 检查是否在 Capacitor 环境中运行
