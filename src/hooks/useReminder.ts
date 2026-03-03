@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useCourseStore, useTimeSlotStore, useScheduleStore } from '../data/stores';
 import { useReminderStore } from '../data/stores/reminder';
 import {
@@ -13,31 +13,51 @@ import {
 export function useReminder() {
   const { courses } = useCourseStore();
   const { timeSlots } = useTimeSlotStore();
-  const { currentScheduleId } = useScheduleStore();
+  const { currentScheduleId, schedules } = useScheduleStore();
   const { enabled, advanceMinutes } = useReminderStore();
   const checkIntervalRef = useRef<number | null>(null);
+  const lastNotifiedRef = useRef<string | null>(null); // 防止重复通知
+
+  // 计算当前周次
+  const getCurrentWeek = useCallback((): number => {
+    if (!currentScheduleId) return 1;
+    const schedule = schedules.find(s => s.id === currentScheduleId);
+    if (!schedule) return 1;
+
+    // 使用学期开始日期计算当前周次（假设第一周从 startWeek 开始）
+    // 这里简化处理，返回 schedule.startWeek
+    // 实际应用应存储学期开始日期并计算
+    const now = new Date();
+    const dayOfWeek = now.getDay() || 7;
+
+    // 简单计算：假设当前是学期第几周
+    // 实际应该根据学期开始日期计算
+    const currentWeek = schedule.startWeek;
+    return currentWeek;
+  }, [currentScheduleId, schedules]);
 
   // 检查并发送提醒
-  const checkAndNotify = async () => {
+  const checkAndNotify = useCallback(async () => {
     if (!enabled) return;
     const permission = await getNotificationPermission();
     if (permission !== 'granted') return;
     if (!currentScheduleId) return;
 
     const scheduleCourses = courses.filter(c => c.scheduleId === currentScheduleId);
-    // 计算当前周次（简化处理，实际应从设置获取）
     const currentWeek = getCurrentWeek();
 
     const next = getNextCourseTime(scheduleCourses, timeSlots, currentWeek);
     if (!next) return;
 
     const minutesUntil = getMinutesUntilCourse(next.date);
+    const notificationKey = `${next.course.id}-${next.date.toDateString()}`;
 
-    // 如果在提醒时间范围内，发送通知
-    if (minutesUntil > 0 && minutesUntil <= advanceMinutes) {
+    // 如果在提醒时间范围内，且未发送过通知，则发送
+    if (minutesUntil > 0 && minutesUntil <= advanceMinutes && lastNotifiedRef.current !== notificationKey) {
+      lastNotifiedRef.current = notificationKey;
       await sendCourseNotification(next.course, next.timeSlot);
     }
-  };
+  }, [enabled, currentScheduleId, courses, timeSlots, advanceMinutes, getCurrentWeek]);
 
   // 启用提醒
   const enableReminder = async () => {
@@ -59,7 +79,7 @@ export function useReminder() {
   useEffect(() => {
     const startChecking = async () => {
       const permission = await getNotificationPermission();
-      if (enabled && permission === 'granted') {
+      if (enabled && permission === 'granted' && currentScheduleId) {
         // 每分钟检查一次
         checkIntervalRef.current = window.setInterval(checkAndNotify, 60000);
         // 立即检查一次
@@ -74,16 +94,10 @@ export function useReminder() {
         clearInterval(checkIntervalRef.current);
       }
     };
-  }, [enabled, courses, timeSlots, advanceMinutes]);
+  }, [enabled, currentScheduleId, checkAndNotify]);
 
   return {
     isSupported: isNotificationSupported(),
     enableReminder,
   };
-}
-
-// 简单计算当前周次（实际应根据学期开始日期计算）
-function getCurrentWeek(): number {
-  // 这里简化处理，返回1，实际应该根据设置中的学期开始日期计算
-  return 1;
 }
