@@ -42,43 +42,32 @@ jobs:
         if: github.event_name == 'push' || github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all'
         run: |
           npx cap add android || true
-          npx cap sync android
 
           cd android
 
           # Show current config for debugging
-          echo "=== Listing android directory ==="
-          ls -la
-          echo "=== Listing app directory ==="
-          ls -la app/
-          echo "=== Current build.gradle ==="
-          cat build.gradle
-          echo "=== Current app/build.gradle ==="
-          cat app/build.gradle
+          echo "=== Current app/build.gradle (SDK lines) ==="
+          grep -n "compileSdk\|targetSdk" app/build.gradle || true
           echo "=== Current gradle-wrapper.properties ==="
           cat gradle/wrapper/gradle-wrapper.properties
 
-          # Update Gradle wrapper to 8.9 (required for AGP 8.7.0)
+          # Update Gradle wrapper to 8.9
           perl -pi -e 's/gradle-8\.2\.1-all\.zip/gradle-8.9-all.zip/g' gradle/wrapper/gradle-wrapper.properties
 
           # Update AGP version in root build.gradle
           perl -pi -e 's/com\.android\.tools\.build:gradle:8\.2\.1/com.android.tools.build:gradle:8.7.0/g' build.gradle
 
           # Update compileSdk and targetSdk in app/build.gradle
-          perl -pi -e 's/compileSdk 34/compileSdk 35/g' app/build.gradle
-          perl -pi -e 's/targetSdk 34/targetSdk 35/g' app/build.gradle
-          # Also try with equals sign
-          perl -pi -e 's/compileSdk = 34/compileSdk = 35/g' app/build.gradle
-          perl -pi -e 's/targetSdk = 34/targetSdk = 35/g' app/build.gradle
+          perl -pi -e 's/compileSdk\s*=?\s*34/compileSdk 35/g' app/build.gradle
+          perl -pi -e 's/targetSdk\s*=?\s*34/targetSdk 35/g' app/build.gradle
 
-          echo "=== Updated gradle-wrapper.properties ==="
-          cat gradle/wrapper/gradle-wrapper.properties
-          echo "=== Updated build.gradle ==="
-          cat build.gradle
           echo "=== Updated app/build.gradle (SDK lines) ==="
-          grep -E "(compileSdk|targetSdk)" app/build.gradle
+          grep -n "compileSdk\|targetSdk" app/build.gradle || true
 
           cd ..
+
+          # Sync after modifications
+          npx cap sync android
 
       - name: Build Android APK (debug)
         if: github.event_name == 'push' || github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all'
