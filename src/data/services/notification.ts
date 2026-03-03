@@ -1,37 +1,78 @@
+import { LocalNotifications, ScheduleOptions } from '@capacitor/local-notifications';
 import type { Course, TimeSlot, ReminderSettings } from '../models';
+
+// 检查是否在 Capacitor 环境中运行
+function isCapacitor(): boolean {
+  return typeof window !== 'undefined' && 'Capacitor' in window;
+}
 
 // 检查浏览器是否支持通知
 export function isNotificationSupported(): boolean {
+  if (isCapacitor()) return true;
   return 'Notification' in window;
 }
 
 // 检查通知权限状态
-export function getNotificationPermission(): NotificationPermission {
-  if (!isNotificationSupported()) return 'denied';
+export async function getNotificationPermission(): Promise<'granted' | 'denied' | 'default'> {
+  if (isCapacitor()) {
+    try {
+      const result = await LocalNotifications.checkPermissions();
+      return result.display === 'granted' ? 'granted' : result.display === 'denied' ? 'denied' : 'default';
+    } catch {
+      return 'denied';
+    }
+  }
+  if (!('Notification' in window)) return 'denied';
   return Notification.permission;
 }
 
 // 请求通知权限
-export async function requestNotificationPermission(): Promise<NotificationPermission> {
-  if (!isNotificationSupported()) return 'denied';
+export async function requestNotificationPermission(): Promise<'granted' | 'denied' | 'default'> {
+  if (isCapacitor()) {
+    try {
+      const result = await LocalNotifications.requestPermissions();
+      return result.display === 'granted' ? 'granted' : 'denied';
+    } catch {
+      return 'denied';
+    }
+  }
+  if (!('Notification' in window)) return 'denied';
   return await Notification.requestPermission();
 }
 
 // 发送课程提醒通知
-export function sendCourseNotification(course: Course, timeSlot: TimeSlot): void {
-  if (getNotificationPermission() !== 'granted') return;
+export async function sendCourseNotification(course: Course, timeSlot: TimeSlot): Promise<void> {
+  const permission = await getNotificationPermission();
+  if (permission !== 'granted') return;
 
-  const notification = new Notification('课程提醒', {
-    body: `${course.name}\n${timeSlot.startTime} 开始 | ${course.location || '未设置地点'}`,
-    icon: '/pwa-192x192.png',
-    tag: `course-${course.id}`,
-    requireInteraction: true,
-  });
+  const body = `${course.name}\n${timeSlot.startTime} 开始 | ${course.location || '未设置地点'}`;
 
-  notification.onclick = () => {
-    window.focus();
-    notification.close();
-  };
+  if (isCapacitor()) {
+    await LocalNotifications.schedule({
+      notifications: [{
+        id: Date.now(),
+        title: '课程提醒',
+        body,
+        schedule: { at: new Date(Date.now() + 1000) }, // 1秒后显示
+        sound: undefined,
+        attachments: undefined,
+        actionTypeId: undefined,
+        extra: { courseId: course.id },
+      }],
+    });
+  } else {
+    const notification = new Notification('课程提醒', {
+      body,
+      icon: '/pwa-192x192.png',
+      tag: `course-${course.id}`,
+      requireInteraction: true,
+    });
+
+    notification.onclick = () => {
+      window.focus();
+      notification.close();
+    };
+  }
 }
 
 // 获取下一个上课时间

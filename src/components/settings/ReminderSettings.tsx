@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useReminderStore } from '../../data/stores/reminder';
 import { isNotificationSupported, getNotificationPermission } from '../../data/services/notification';
 import { Button } from '../common';
@@ -20,8 +20,16 @@ export function ReminderSettings({ onEnable }: ReminderSettingsProps) {
   } = useReminderStore();
 
   const [isEnabling, setIsEnabling] = useState(false);
+  const [permission, setPermission] = useState<'granted' | 'denied' | 'default'>('default');
   const isSupported = isNotificationSupported();
-  const permission = getNotificationPermission();
+
+  useEffect(() => {
+    const checkPermission = async () => {
+      const perm = await getNotificationPermission();
+      setPermission(perm);
+    };
+    checkPermission();
+  }, []);
 
   const handleToggle = async () => {
     if (!enabled) {
@@ -31,6 +39,8 @@ export function ReminderSettings({ onEnable }: ReminderSettingsProps) {
           const success = await onEnable();
           if (success) {
             setEnabled(true);
+            const perm = await getNotificationPermission();
+            setPermission(perm);
           }
         } else {
           setEnabled(true);
@@ -46,7 +56,7 @@ export function ReminderSettings({ onEnable }: ReminderSettingsProps) {
   if (!isSupported) {
     return (
       <div style={{ padding: '16px', color: 'var(--on-surface-variant)' }}>
-        您的浏览器不支持通知功能
+        您的设备不支持通知功能
       </div>
     );
   }
