@@ -47,28 +47,36 @@ jobs:
           cd android
 
           # Show current config for debugging
-          echo "=== Current variables.gradle ==="
-          cat variables.gradle 2>/dev/null || echo "No variables.gradle"
+          echo "=== Listing android directory ==="
+          ls -la
+          echo "=== Listing app directory ==="
+          ls -la app/
           echo "=== Current build.gradle ==="
-          head -30 build.gradle
+          cat build.gradle
+          echo "=== Current app/build.gradle ==="
+          cat app/build.gradle
           echo "=== Current gradle-wrapper.properties ==="
           cat gradle/wrapper/gradle-wrapper.properties
 
           # Update Gradle wrapper to 8.9 (required for AGP 8.7.0)
           perl -pi -e 's/gradle-8\.2\.1-all\.zip/gradle-8.9-all.zip/g' gradle/wrapper/gradle-wrapper.properties
 
-          # Update AGP and SDK versions using perl (more reliable than sed)
-          perl -pi -e 's/8\.2\.1/8.7.0/g' build.gradle
-          perl -pi -e 's/compileSdk = 34/compileSdk = 35/g' variables.gradle
-          perl -pi -e 's/targetSdk = 34/targetSdk = 35/g' variables.gradle
-          perl -pi -e 's/agp = "8\.2\.1"/agp = "8.7.0"/g' variables.gradle
+          # Update AGP version in root build.gradle
+          perl -pi -e 's/com\.android\.tools\.build:gradle:8\.2\.1/com.android.tools.build:gradle:8.7.0/g' build.gradle
 
-          # Also update app/build.gradle
+          # Update compileSdk and targetSdk in app/build.gradle
           perl -pi -e 's/compileSdk 34/compileSdk 35/g' app/build.gradle
           perl -pi -e 's/targetSdk 34/targetSdk 35/g' app/build.gradle
+          # Also try with equals sign
+          perl -pi -e 's/compileSdk = 34/compileSdk = 35/g' app/build.gradle
+          perl -pi -e 's/targetSdk = 34/targetSdk = 35/g' app/build.gradle
 
-          echo "=== Updated variables.gradle ==="
-          cat variables.gradle 2>/dev/null || echo "No variables.gradle"
+          echo "=== Updated gradle-wrapper.properties ==="
+          cat gradle/wrapper/gradle-wrapper.properties
+          echo "=== Updated build.gradle ==="
+          cat build.gradle
+          echo "=== Updated app/build.gradle (SDK lines) ==="
+          grep -E "(compileSdk|targetSdk)" app/build.gradle
 
           cd ..
 
