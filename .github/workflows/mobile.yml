@@ -43,9 +43,14 @@ jobs:
         run: |
           npx cap add android || true
           npx cap sync android
-          # Update Android SDK version to 35
-          sed -i 's/compileSdk = 34/compileSdk = 35/' android/variables.gradle
-          sed -i 's/targetSdk = 34/targetSdk = 35/' android/variables.gradle
+          # Update Android Gradle Plugin to support SDK 35
+          sed -i 's/agp = "8.2.1"/agp = "8.7.0"/g' android/variables.gradle || true
+          sed -i 's/classpath "com.android.tools.build:gradle:8.2.1"/classpath "com.android.tools.build:gradle:8.7.0"/g' android/build.gradle || true
+          # Update compileSdkVersion and targetSdkVersion to 35
+          sed -i 's/compileSdk = 34/compileSdk = 35/g' android/variables.gradle || true
+          sed -i 's/targetSdk = 34/targetSdk = 35/g' android/variables.gradle || true
+          echo "=== variables.gradle ==="
+          cat android/variables.gradle || true
 
       - name: Build Android APK (debug)
         if: github.event_name == 'push' || github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all'
