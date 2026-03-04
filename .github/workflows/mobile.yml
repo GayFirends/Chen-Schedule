@@ -57,12 +57,10 @@ jobs:
         run: |
           if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
             echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/keystore.jks
-            cat >> android/keystore.properties << EOF
-storeFile=keystore.jks
-storePassword=$ANDROID_KEYSTORE_PASSWORD
-keyAlias=$ANDROID_KEY_ALIAS
-keyPassword=$ANDROID_KEY_PASSWORD
-EOF
+            echo "storeFile=keystore.jks" > android/keystore.properties
+            echo "storePassword=$ANDROID_KEYSTORE_PASSWORD" >> android/keystore.properties
+            echo "keyAlias=$ANDROID_KEY_ALIAS" >> android/keystore.properties
+            echo "keyPassword=$ANDROID_KEY_PASSWORD" >> android/keystore.properties
           fi
 
       - name: Update version info
