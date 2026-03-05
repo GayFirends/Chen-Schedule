@@ -64,9 +64,32 @@ jobs:
           sed -i "s/versionName \"[^\"]*\"/versionName \"$VERSION_NAME\"/" app/build.gradle
           echo "Version: $VERSION_NAME (code: $VERSION_CODE)"
 
-          # 构建APK（暂用debug，签名配置后再改release）
-          ./gradlew assembleDebug
-          mv app/build/outputs/apk/debug/app-debug.apk ../简程表-${{ github.ref_name }}.apk
+          # 配置签名
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "Configuring release signing..."
+            echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > app/keystore.jks
+
+            # 在 build.gradle 中添加签名配置
+            sed -i '/android {/a\
+    signingConfigs {\
+        release {\
+            storeFile file("keystore.jks")\
+            storePassword "'"$ANDROID_KEYSTORE_PASSWORD"'"\
+            keyAlias "'"$ANDROID_KEY_ALIAS"'"\
+            keyPassword "'"$ANDROID_KEY_PASSWORD"'"\
+        }\
+    }' app/build.gradle
+
+            # 让 release buildType 使用签名
+            sed -i 's/buildTypes {/buildTypes {\n        release {\n            signingConfig signingConfigs.release\n        }/' app/build.gradle || true
+
+            ./gradlew assembleRelease
+            mv app/build/outputs/apk/release/app-release.apk ../简程表-${{ github.ref_name }}.apk
+          else
+            echo "No signing config, building debug APK..."
+            ./gradlew assembleDebug
+            mv app/build/outputs/apk/debug/app-debug.apk ../简程表-${{ github.ref_name }}.apk
+          fi
 
       - name: Upload Android APK Artifact
         if: github.event_name == 'push' || github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all'
