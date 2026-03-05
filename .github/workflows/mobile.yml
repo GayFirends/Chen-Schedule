@@ -47,7 +47,7 @@ jobs:
           npx cap add android || true
           npx cap sync android
 
-      - name: Setup signing keystore
+      - name: Build Android APK
         if: github.event_name == 'push' || github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all'
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -55,42 +55,18 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          if [ -n "$ANDROID_KEYSTORE_BASE64" ]; then
-            echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > android/app/keystore.jks
-            echo "storeFile=keystore.jks" > android/keystore.properties
-            echo "storePassword=$ANDROID_KEYSTORE_PASSWORD" >> android/keystore.properties
-            echo "keyAlias=$ANDROID_KEY_ALIAS" >> android/keystore.properties
-            echo "keyPassword=$ANDROID_KEY_PASSWORD" >> android/keystore.properties
-          fi
-
-      - name: Update version info
-        if: github.event_name == 'push' || github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all'
-        run: |
-          # 从 tag 获取版本号（去掉 v 前缀）
-          VERSION_NAME="${GITHUB_REF_NAME#v}"
-          # 生成 versionCode（基于版本号的数字）
-          VERSION_CODE=$(echo "$VERSION_NAME" | awk -F. '{printf "%d%02d%02d", $1, $2, $3}')
-
           cd android
-          # 更新 versionCode 和 versionName
+
+          # 更新版本号
+          VERSION_NAME="${GITHUB_REF_NAME#v}"
+          VERSION_CODE=$(echo "$VERSION_NAME" | awk -F. '{printf "%d%02d%02d", $1, $2, $3}')
           sed -i "s/versionCode [0-9]*/versionCode $VERSION_CODE/" app/build.gradle
           sed -i "s/versionName \"[^\"]*\"/versionName \"$VERSION_NAME\"/" app/build.gradle
-
           echo "Version: $VERSION_NAME (code: $VERSION_CODE)"
 
-      - name: Build Android APK
-        if: github.event_name == 'push' || github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all'
-        run: |
-          cd android
-          if [ -f keystore.properties ]; then
-            # 使用签名密钥构建 release APK
-            ./gradlew assembleRelease
-            mv app/build/outputs/apk/release/app-release.apk ../简程表-${{ github.ref_name }}.apk
-          else
-            # 无签名密钥时构建 debug APK（签名会变化）
-            ./gradlew assembleDebug
-            mv app/build/outputs/apk/debug/app-debug.apk ../简程表-${{ github.ref_name }}.apk
-          fi
+          # 构建APK（暂用debug，签名配置后再改release）
+          ./gradlew assembleDebug
+          mv app/build/outputs/apk/debug/app-debug.apk ../简程表-${{ github.ref_name }}.apk
 
       - name: Upload Android APK Artifact
         if: github.event_name == 'push' || github.event.inputs.platform == 'android' || github.event.inputs.platform == 'all'
